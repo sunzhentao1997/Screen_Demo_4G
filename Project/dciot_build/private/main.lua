@@ -17,6 +17,9 @@
 --³õÊ¼»¯º¯Êý
 function on_init()
 	dofile('dev_air724ug.lua')
+	dofile('4G_App.lua')
+
+	air724ug_set_callback(on_air724ug_send_callback,on_air724ug_recv_callback)
 	uart_set_baudrate3(115200)
 
 	air724ug_sys_init()
