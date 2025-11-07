@@ -12,19 +12,25 @@ local at_cmd_recv_callback = nil
 
 List = {}
 
-function air724ug_set_callback(send_cb)
+--[[
+º¯Êı¹¦ÄÜ£ºÉèÖÃ»Øµ÷º¯Êı
+²ÎÊı£ºsend_cb - ·¢ËÍÃüÁî»Øµ÷º¯Êı
+      recv_cb - ½ÓÊÕÊı¾İ»Øµ÷º¯Êı
+--]]
+function air724ug_set_callback(send_cb,recv_cb)
     at_cmd_send_callback = send_cb
     at_cmd_recv_callback = recv_cb
 end
 
 --[[
-åˆ›å»ºå¹¶åˆå§‹åŒ–ä¸€ä¸ªæ–°çš„åˆ—è¡¨ç»“æ„
-@è¿”å› table æ–°çš„åˆ—è¡¨ï¼ŒåŒ…å«åˆå§‹çš„é¦–å°¾ç´¢å¼•
+º¯Êı¹¦ÄÜ£º³õÊ¼»¯ÃüÁî¶ÓÁĞ
+²ÎÊı£ºÎŞ
+·µ»ØÖµ£ºÎŞ
 --]]
 function List.new()
     return {
-        first = 0,    -- åˆ—è¡¨é¦–å…ƒç´ ç´¢å¼•
-        last = -1     -- åˆ—è¡¨æœ«å…ƒç´ ç´¢å¼•
+        first = 0,    -- 
+        last = -1     -- 
     }
 end
 
@@ -32,27 +38,24 @@ local cmd_list = List.new()
 local cmd_current = nil
 
 --[[
-å‡½æ•°åŠŸèƒ½ï¼šå‘å‘½ä»¤é˜Ÿåˆ—ä¸­æ·»åŠ ATæŒ‡ä»¤
-å‚æ•°åˆ—è¡¨ï¼š
-    list - æŒ‡ä»¤é˜Ÿåˆ—å¯¹è±¡
-    cmd  - è¦æ·»åŠ çš„ATæŒ‡ä»¤å­—ç¬¦ä¸²
+º¯Êı¹¦ÄÜ ½«ÃüÁîÌí¼Óµ½ÁĞ±íÖĞ
+²ÎÊı:   list - ÃüÁîÁĞ±í
+        cmd - ÒªÌí¼ÓµÄÃüÁî
+·µ»ØÖµ: ÎŞ
 --]]
 function List.pushcmd(list, cmd)
-    -- å¦‚æœå‘½ä»¤ä¸ºç©ºï¼Œåˆ™ç›´æ¥è¿”å›
     if cmd == nil then
         return
     end
-
-    -- è®¡ç®—æ–°å‘½ä»¤çš„ç´¢å¼•ä½ç½®ï¼Œå¹¶å°†å…¶æ·»åŠ åˆ°åˆ—è¡¨ä¸­
     local last = cmd_list.last + 1
     cmd_list[last] = cmd
     cmd_list.last = last
 end
 
 --[[
-å‡½æ•°åŠŸèƒ½ï¼šä»å‘½ä»¤é˜Ÿåˆ—ä¸­å¼¹å‡ºç¬¬ä¸€ä¸ªå‘½ä»¤
-å‚æ•°ï¼šlist - å‘½ä»¤é˜Ÿåˆ—å¯¹è±¡
-è¿”å›å€¼ï¼šæˆåŠŸè¿”å›å‘½ä»¤å¯¹è±¡ï¼Œé˜Ÿåˆ—ä¸ºç©ºæ—¶è¿”å›nil
+º¯Êı¹¦ÄÜ£º´ÓÁĞ±íÖĞÈ¡³öÃüÁî
+²ÎÊı£ºlist - ÃüÁîÁĞ±í
+·µ»ØÖµ£ºÃüÁî×Ö·û´®
 --]]
 function List.popcmd(list)
     local first = cmd_list.first
@@ -67,12 +70,12 @@ function List.popcmd(list)
 end
 
 --[[
-å‡½æ•°åŠŸèƒ½ï¼šatæŒ‡ä»¤è£…è½½å‡½æ•°
-å‚æ•°åˆ—è¡¨ï¼š
-    send_cmd  - è¦å‘é€çš„ATæŒ‡ä»¤å­—ç¬¦ä¸²
-    recv_data - æ¥æ”¶åˆ°çš„æ•°æ®å­—ç¬¦ä¸²
-    time_out  - è¶…æ—¶æ—¶é—´
-    retry     - é‡è¯•æ¬¡æ•°
+º¯Êı¹¦ÄÜ£º×°ÔØATÃüÁî
+²ÎÊı£ºsend_cmd - ·¢ËÍµÄATÃüÁî
+      recv_data - ½ÓÊÕµÄÊı¾İ
+      time_out - ³¬Ê±Ê±¼ä
+      retry - ÖØÊÔ´ÎÊı
+·µ»ØÖµ£ºÎŞ
 --]]
 function at_cmd_load(send_cmd, recv_data, time_out, retry)
     local cmd = {}
@@ -90,8 +93,9 @@ function at_cmd_load(send_cmd, recv_data, time_out, retry)
 end
 
 --[[
-å‡½æ•°åŠŸèƒ½ï¼šAT æŒ‡ä»¤æ¸…é™¤
-å‚æ•°ï¼šæ— 
+º¯Êı¹¦ÄÜ£ºÇå¿ÕÃüÁî¶ÓÁĞ
+²ÎÊı£ºÎŞ
+·µ»ØÖµ£ºÎŞ
 --]]
 function at_cmd_clear()
     cmd_current = nil
@@ -101,8 +105,9 @@ function at_cmd_clear()
 end
 
 --[[
-å‡½æ•°åŠŸèƒ½ï¼šAT æŒ‡ä»¤å‘é€
-å‚æ•°ï¼šæ— 
+º¯Êı¹¦ÄÜ£º·¢ËÍATÃüÁî
+²ÎÊı£ºÎŞ
+·µ»ØÖµ£ºÎŞ
 --]]
 function at_cmd_send()
     if cmd_current == nil then
@@ -119,8 +124,9 @@ function at_cmd_send()
 end
 
 --[[
-å‡½æ•°åŠŸèƒ½ï¼šAT æŒ‡ä»¤å‘é€ä¸‹ä¸€æ¡
-å‚æ•°ï¼šæ— 
+º¯Êı¹¦ÄÜ£º·¢ËÍÏÂÒ»ÌõATÃüÁî
+²ÎÊı£ºÎŞ
+·µ»ØÖµ£ºÎŞ
 --]]
 function at_cmd_send_next()
     cmd_current = List.popcmd(cmd_list)
@@ -128,8 +134,9 @@ function at_cmd_send_next()
 end
 
 --[[
-å‡½æ•°åŠŸèƒ½ï¼šAT æŒ‡ä»¤å‘é€è¶…æ—¶å¤„ç†
-å‚æ•°ï¼šæ— 
+º¯Êı¹¦ÄÜ£º·¢ËÍ³¬Ê±´¦Àí
+²ÎÊı£ºÎŞ
+·µ»ØÖµ£ºÎŞ
 --]]
 function at_cmd_send_timeout()
     if cmd_current == nil then
@@ -146,13 +153,17 @@ function at_cmd_send_timeout()
 end
 
 --[[
-å‡½æ•°åŠŸèƒ½ï¼šAT æŒ‡ä»¤æ¥æ”¶æ•°æ®å¤„ç†
-å‚æ•°ï¼šdata - æ¥æ”¶åˆ°çš„æ•°æ®å­—ç¬¦ä¸²
+º¯Êı¹¦ÄÜ£ºÊı¾İ½ÓÊÕ´¦Àí
+²ÎÊı£ºdata - ½ÓÊÕµÄÊı¾İ
+·µ»ØÖµ£ºÎŞ
 --]]
 function at_cmd_recv_data(data)
 	if cmd_current == nil then
+        at_cmd_recv_callback(nil, data)
 		at_cmd_send_next()
 		return
+    else
+        at_cmd_recv_callback(cmd_current.send_cmd, data)
 	end
 
 	if string.find(data, cmd_current.recv_data) ~= nil then
@@ -161,8 +172,9 @@ function at_cmd_recv_data(data)
 end
 
 --[[
-å‡½æ•°åŠŸèƒ½ï¼š4Gæ¨¡å—ä¸Šç”µ
-å‚æ•°ï¼šæ— 
+º¯Êı¹¦ÄÜ£º4gÄ£¿éÉÏµçÆô¶¯
+²ÎÊı£ºÎŞ
+·µ»ØÖµ£ºÎŞ
 --]]
 function air724ug_setup()
     gpio_set_value(air724ug_io_power, 1)
@@ -171,8 +183,9 @@ function air724ug_setup()
 end
 
 --[[
-å‡½æ•°åŠŸèƒ½ï¼š4Gæ¨¡å—å¤ä½
-å‚æ•°ï¼šæ— 
+º¯Êı¹¦ÄÜ£º4gÄ£¿é¸´Î»
+²ÎÊı£ºÎŞ
+·µ»ØÖµ£ºÎŞ
 --]]
 function air724ug_reset()
     gpio_set_value(air724ug_io_reset, 1)
@@ -181,35 +194,36 @@ function air724ug_reset()
 end
 
 --[[
-å‡½æ•°åŠŸèƒ½ï¼š4Gæ¨¡å—åˆå§‹åŒ–
-å‚æ•°ï¼šæ— 
+º¯Êı¹¦ÄÜ£º4gÄ£¿éÏµÍ³³õÊ¼»¯
+²ÎÊı£ºÎŞ
+·µ»ØÖµ£ºÎŞ
 --]]
 function air724ug_sys_init()
     gpio_set_out(air724ug_io_power)
     gpio_set_out(air724ug_io_reset)
     air724ug_setup()
 
-    --åˆå§‹åŒ–4Gæ¨¡å—
     at_cmd_load('AT','OK',500,1000)
     at_cmd_load('AT','OK',500,1000)
     at_cmd_load('AT+CGATT?','+CGATT: 1',1000,100)
-    at_cmd_load('','OK',1000)                                       --æ²¡æœ‰å‘½ä»¤ï¼Œåªæ˜¯ç­‰å¾…OKè¿”å›
-    at_cmd_load('ATE0','OK',1000)                                   --å…³é—­å›æ˜¾æ¨¡å¼
+    at_cmd_load('','OK',1000)                                       
+    at_cmd_load('ATE0','OK',1000)                                  
     at_cmd_load('AT+COPS?','OK',1000,0)
     at_cmd_load('AT+SAPBR=3,1,\"CONTYPE\",\"GPRS\"','OK',1000)
 end
 
 --[[
-å‡½æ•°åŠŸèƒ½ï¼š4Gæ¨¡å—é‡ç½®åˆå§‹åŒ–
-å‚æ•°ï¼šæ— 
+º¯Êı¹¦ÄÜ£º4gÄ£¿é¸´Î»³õÊ¼»¯
+²ÎÊı£ºÎŞ
+·µ»ØÖµ£ºÎŞ
 --]]
 function air724ug_reset_init()
-	--åˆå§‹åŒ–4Gæ¨¡å—
+
     at_cmd_load('AT','OK',500,100)
     at_cmd_load('AT','OK',500,100)
     at_cmd_load('AT+CGATT?','+CGATT: 1',1000,100)
-    at_cmd_load('','OK',1000)                                       --æ²¡æœ‰å‘½ä»¤ï¼Œåªæ˜¯ç­‰å¾…OKè¿”å›
-    at_cmd_load('ATE0','OK',1000)                                   --å…³é—­å›æ˜¾æ¨¡å¼
+    at_cmd_load('','OK',1000)                                      
+    at_cmd_load('ATE0','OK',1000)                                  
     at_cmd_load('AT+COPS?','OK',1000,0,on_get_mccmnc_cb)
     at_cmd_load('AT+SAPBR=3,1,\"CONTYPE\",\"GPRS\"','OK',1000)
 end
@@ -217,8 +231,9 @@ end
 local string_val = ''
 
 --[[
-å‡½æ•°åŠŸèƒ½ï¼š4Gæ¨¡å—æ¥æ”¶æ•°æ®å›è°ƒå‡½æ•°
-å‚æ•°ï¼špacket - æ¥æ”¶åˆ°çš„æ•°æ®å­—ç¬¦ä¸²
+º¯Êı¹¦ÄÜ£º´®¿Ú½ÓÊÕ»Øµ÷º¯Êı
+²ÎÊı£ºpacket - ´®¿Ú·µ»ØÊı¾İ°ü
+·µ»ØÖµ£ºÎŞ
 --]]
 function on_air724ug_recv_data(packet)
     local len = #(packet)
@@ -232,15 +247,16 @@ function on_air724ug_recv_data(packet)
                 recv_data_handle(string_val)
             end
         else
-            uart_send_string(string_val)
+--            uart_send_string(string_val)
             recv_data_handle(string_val)
         end
     end
 end
 
 --[[
-å‡½æ•°åŠŸèƒ½ï¼š4Gæ¨¡å—æ¥æ”¶æ•°æ®å¤„ç†
-å‚æ•°ï¼šstr - æ¥æ”¶åˆ°çš„æ•°æ®å­—ç¬¦ä¸²
+º¯Êı¹¦ÄÜ£º´®¿Ú½ÓÊÕÊı¾İ´¦Àí
+²ÎÊı£ºstr - ½ÓÊÕµÄÊı¾İ
+·µ»ØÖµ£ºÎŞ
 --]]
 function recv_data_handle(str)
 	if string.len(str) >= 0 then
@@ -250,8 +266,9 @@ function recv_data_handle(str)
 end
 
 --[[
-å‡½æ•°åŠŸèƒ½ï¼š4Gæ¨¡å—å®šæ—¶å™¨è¶…æ—¶å›è°ƒå‡½æ•°
-å‚æ•°ï¼štimer_id - å®šæ—¶å™¨ID
+º¯Êı¹¦ÄÜ£º¶¨Ê±Æ÷³¬Ê±»Øµ÷º¯Êı
+²ÎÊı£ºtimer_id - ¶¨Ê±Æ÷ID
+·µ»ØÖµ£ºÎŞ
 --]]
 function on_air724ug_timer(timer_id)
     if timer_id == at_cmd_timer then
@@ -268,5 +285,38 @@ function on_air724ug_timer(timer_id)
 end
 
 --[[
-
+º¯Êı¹¦ÄÜ£ºÉèÖÃ4GÄ£¿éµÄ²¨ÌØÂÊ
+²ÎÊı£ºbaudrate - ²¨ÌØÂÊ
+·µ»ØÖµ£ºÎŞ
 --]]
+function at_set_baudrate(baudrate)
+    at_cmd_load('AT+IPR=' .. baudrate, 'OK', 1000, 3)
+end
+
+--[[
+º¯Êı¹¦ÄÜ£ºÉèÖÃ4GÄ£¿éµÄÍøÂç×¢²áĞÅÏ¢ ÔËÓªÉÌºÍĞÅºÅÇ¿¶È
+²ÎÊı£ºÎŞ
+·µ»ØÖµ£ºÎŞ
+--]]
+function at_cops_csq()
+    at_cmd_load('AT+COPS?','OK',1000)
+    at_cmd_load('AT+CSQ','OK',1000)
+end
+
+--[[
+º¯Êı¹¦ÄÜ£º»ñÈ¡SIM¿¨µÄICCIDºÅÂë
+²ÎÊı£ºÎŞ
+·µ»ØÖµ£ºÎŞ
+--]]
+function at_get_iccid()
+    at_cmd_load('AT+ICCID', 'OK', 1000, 3)
+end
+
+--[[
+º¯Êı¹¦ÄÜ£º»ñÈ¡»ùÕ¾Ê±¼ä
+²ÎÊı£ºÎŞ
+·µ»ØÖµ£ºÎŞ
+--]]
+function at_get_base_station_time()
+    at_cmd_load('AT+CIPGSMLOC=2,1', 'OK', 9000, 3)
+end

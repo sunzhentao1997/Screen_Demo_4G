@@ -13,7 +13,7 @@
 
 --下面列出了常用的回调函数
 --更多功能请阅读<<LUA脚本API.pdf>>
-
+uart_free_protocol = air_debug_mode      --自由串口协议
 --初始化函数
 function on_init()
 	dofile('dev_air724ug.lua')
@@ -23,6 +23,7 @@ function on_init()
 	uart_set_baudrate3(115200)
 
 	air724ug_sys_init()
+	at_get_iccid()	
 end
 
 --定时回调函数，系统每隔1秒钟自动调用。

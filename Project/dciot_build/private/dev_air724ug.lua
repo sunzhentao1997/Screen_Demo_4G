@@ -12,19 +12,19 @@ local at_cmd_recv_callback = nil
 
 List = {}
 
-function air724ug_set_callback(send_cb)
+function air724ug_set_callback(send_cb,recv_cb)
     at_cmd_send_callback = send_cb
     at_cmd_recv_callback = recv_cb
 end
 
 --[[
-创建并初始化一个新的列表结构
-@返回 table 新的列表，包含初始的首尾索引
+创建并初始化一�?新的列表结构
+@返回 table 新的列表，包�?初�?�的首尾索引
 --]]
 function List.new()
     return {
-        first = 0,    -- 列表首元素索引
-        last = -1     -- 列表末元素索引
+        first = 0,    -- 列表首元素索�?
+        last = -1     -- 列表�?元素索引
     }
 end
 
@@ -32,10 +32,10 @@ local cmd_list = List.new()
 local cmd_current = nil
 
 --[[
-函数功能：向命令队列中添加AT指令
-参数列表：
+函数功能：向命令队列�?添加AT指令
+参数列表�?
     list - 指令队列对象
-    cmd  - 要添加的AT指令字符串
+    cmd  - 要添加的AT指令字�?�串
 --]]
 function List.pushcmd(list, cmd)
     -- 如果命令为空，则直接返回
@@ -50,7 +50,7 @@ function List.pushcmd(list, cmd)
 end
 
 --[[
-函数功能：从命令队列中弹出第一个命令
+函数功能：从命令队列�?弹出�?一�?命令
 参数：list - 命令队列对象
 返回值：成功返回命令对象，队列为空时返回nil
 --]]
@@ -68,9 +68,9 @@ end
 
 --[[
 函数功能：at指令装载函数
-参数列表：
-    send_cmd  - 要发送的AT指令字符串
-    recv_data - 接收到的数据字符串
+参数列表�?
+    send_cmd  - 要发送的AT指令字�?�串
+    recv_data - 接收到的数据字�?�串
     time_out  - 超时时间
     retry     - 重试次数
 --]]
@@ -101,7 +101,7 @@ function at_cmd_clear()
 end
 
 --[[
-函数功能：AT 指令发送
+函数功能：AT 指令发�?
 参数：无
 --]]
 function at_cmd_send()
@@ -119,7 +119,7 @@ function at_cmd_send()
 end
 
 --[[
-函数功能：AT 指令发送下一条
+函数功能：AT 指令发送下一�?
 参数：无
 --]]
 function at_cmd_send_next()
@@ -128,7 +128,7 @@ function at_cmd_send_next()
 end
 
 --[[
-函数功能：AT 指令发送超时处理
+函数功能：AT 指令发送超时�?�理
 参数：无
 --]]
 function at_cmd_send_timeout()
@@ -147,12 +147,15 @@ end
 
 --[[
 函数功能：AT 指令接收数据处理
-参数：data - 接收到的数据字符串
+参数：data - 接收到的数据字�?�串
 --]]
 function at_cmd_recv_data(data)
 	if cmd_current == nil then
+        at_cmd_recv_callback(nil, data)
 		at_cmd_send_next()
 		return
+    else
+        at_cmd_recv_callback(cmd_current.send_cmd, data)
 	end
 
 	if string.find(data, cmd_current.recv_data) ~= nil then
@@ -161,7 +164,7 @@ function at_cmd_recv_data(data)
 end
 
 --[[
-函数功能：4G模块上电
+函数功能�?4G模块上电
 参数：无
 --]]
 function air724ug_setup()
@@ -171,7 +174,7 @@ function air724ug_setup()
 end
 
 --[[
-函数功能：4G模块复位
+函数功能�?4G模块复位
 参数：无
 --]]
 function air724ug_reset()
@@ -181,7 +184,7 @@ function air724ug_reset()
 end
 
 --[[
-函数功能：4G模块初始化
+函数功能�?4G模块初�?�化
 参数：无
 --]]
 function air724ug_sys_init()
@@ -189,26 +192,26 @@ function air724ug_sys_init()
     gpio_set_out(air724ug_io_reset)
     air724ug_setup()
 
-    --初始化4G模块
+    --初�?�化4G模块
     at_cmd_load('AT','OK',500,1000)
     at_cmd_load('AT','OK',500,1000)
     at_cmd_load('AT+CGATT?','+CGATT: 1',1000,100)
-    at_cmd_load('','OK',1000)                                       --没有命令，只是等待OK返回
+    at_cmd_load('','OK',1000)                                       --没有命令，只�?等待OK返回
     at_cmd_load('ATE0','OK',1000)                                   --关闭回显模式
     at_cmd_load('AT+COPS?','OK',1000,0)
     at_cmd_load('AT+SAPBR=3,1,\"CONTYPE\",\"GPRS\"','OK',1000)
 end
 
 --[[
-函数功能：4G模块重置初始化
+函数功能�?4G模块重置初�?�化
 参数：无
 --]]
 function air724ug_reset_init()
-	--初始化4G模块
+	--初�?�化4G模块
     at_cmd_load('AT','OK',500,100)
     at_cmd_load('AT','OK',500,100)
     at_cmd_load('AT+CGATT?','+CGATT: 1',1000,100)
-    at_cmd_load('','OK',1000)                                       --没有命令，只是等待OK返回
+    at_cmd_load('','OK',1000)                                       --没有命令，只�?等待OK返回
     at_cmd_load('ATE0','OK',1000)                                   --关闭回显模式
     at_cmd_load('AT+COPS?','OK',1000,0,on_get_mccmnc_cb)
     at_cmd_load('AT+SAPBR=3,1,\"CONTYPE\",\"GPRS\"','OK',1000)
@@ -217,8 +220,8 @@ end
 local string_val = ''
 
 --[[
-函数功能：4G模块接收数据回调函数
-参数：packet - 接收到的数据字符串
+函数功能�?4G模块接收数据回调函数
+参数：packet - 接收到的数据字�?�串
 --]]
 function on_air724ug_recv_data(packet)
     local len = #(packet)
@@ -232,15 +235,15 @@ function on_air724ug_recv_data(packet)
                 recv_data_handle(string_val)
             end
         else
-            uart_send_string(string_val)
+--            uart_send_string(string_val)
             recv_data_handle(string_val)
         end
     end
 end
 
 --[[
-函数功能：4G模块接收数据处理
-参数：str - 接收到的数据字符串
+函数功能�?4G模块接收数据处理
+参数：str - 接收到的数据字�?�串
 --]]
 function recv_data_handle(str)
 	if string.len(str) >= 0 then
@@ -250,7 +253,7 @@ function recv_data_handle(str)
 end
 
 --[[
-函数功能：4G模块定时器超时回调函数
+函数功能�?4G模块定时器超时回调函�?
 参数：timer_id - 定时器ID
 --]]
 function on_air724ug_timer(timer_id)
@@ -267,6 +270,38 @@ function on_air724ug_timer(timer_id)
 	end
 end
 
---[[
+--[[***************************************************************************
+** Function name:  air_set_baudrate
+** Descriptions :  设置4G模块波特�?
+** @baudrate    :  波特�?   
+***************************************************************************--]]
+function at_set_baudrate(baudrate)
+    at_cmd_load('AT+IPR=' .. baudrate, 'OK', 1000, 3)
+end
 
---]]
+--[[***************************************************************************
+** Function name : at_cops_csq
+** Descriptions  : 获取运营商信�?、信号强�?
+** @return       : nil,无返回�?
+***************************************************************************--]]
+function at_cops_csq()
+    at_cmd_load('AT+COPS?','OK',1000)
+    at_cmd_load('AT+CSQ','OK',1000)
+end
+
+--[[***************************************************************************
+** Function name:  air_get_iccid
+** Descriptions :  获取SIM卡的 ICCID 号码 
+***************************************************************************--]]
+function at_get_iccid()
+    at_cmd_load('AT+ICCID', 'OK', 1000, 3)
+end
+
+--[[***************************************************************************
+** Function name:  air_get_base_station_time
+** Descriptions :  获取基站时间
+-- 返回�?+CIPGSMLOC: 0,2022/07/12,09:35:21
+***************************************************************************--]]
+function at_get_base_station_time()
+    at_cmd_load('AT+CIPGSMLOC=2,1', 'OK', 9000, 3)
+end
