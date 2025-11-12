@@ -1,4 +1,18 @@
 -- This file is used to configure the air724ug module.
+local setup_mobile_mccmnc = 
+{
+    ['46000'] = 'CMIOT',
+    ['46001'] = 'uninet',
+    ['46002'] = 'CMIOT',
+    ['46003'] = 'ctnet',
+    ['46005'] = 'ctnet',
+    ['46006'] = 'uninet',
+    ['46007'] = 'CMIOT',
+    ['46009'] = 'uninet',
+    ['46011'] = 'ctnet',
+    ['46020'] = 'CMIOT'
+} -- 移动接入点，用于设置网络接入点
+
 local at_cmd_timer = 20
 local air724ug_set_timer = 21
 local air724ug_set_timeout = 4000
@@ -77,13 +91,14 @@ end
       retry - 重试次数
 返回值：无
 --]]
-function at_cmd_load(send_cmd, recv_data, time_out, retry)
+function at_cmd_load(send_cmd, recv_data, time_out, retry, callback)
     local cmd = {}
 
     cmd.send_cmd = send_cmd
     cmd.recv_data = recv_data
     cmd.time_out = time_out
     cmd.retry = retry
+    cmd.callback = callback
 
     List.pushcmd(cmd_list, cmd)
 
@@ -166,6 +181,13 @@ function at_cmd_recv_data(data)
         at_cmd_recv_callback(cmd_current.send_cmd, data)
 	end
 
+    if cmd_current.callback ~= nil then
+        cmd_current.callback(cmd_current.send_cmd, data)
+        if string.find(data, '+COPS') ~= nil then
+            cmd_current.callback('sim_oper', data)
+        end
+    end
+
 	if string.find(data, cmd_current.recv_data) ~= nil then
 		at_cmd_send_next()
 	end
@@ -203,13 +225,26 @@ function air724ug_sys_init()
     gpio_set_out(air724ug_io_reset)
     air724ug_setup()
 
+    local function on_get_mccmnc_cb(send_cmd, recv_data)
+--        uart_send_string(send_cmd)
+        if send_cmd == 'sim_oper' then
+--            uart_send_string('init success')
+            local regular_e = '+COPS: %d*,%d*,"(%d*)"'                                     -- 正则表达式
+            local my_mobile_mccmnc = string.match(recv_data, regular_e)                        -- 赋值给 my_mobile_mccmnc
+            local my_mobile_oper = setup_mobile_mccmnc[my_mobile_mccmnc]
+            at_cmd_load('AT+SAPBR=3,1,\"APN\",\"' .. my_mobile_oper .. '\"', 'OK', 3000, 3) -- 初始化设置
+            at_cmd_load('AT+SAPBR=1,1', 'OK', 3000, 3)                                      -- 初始化设置
+        end
+    end
+
     at_cmd_load('AT','OK',500,1000)
-    at_cmd_load('AT','OK',500,1000)
-    at_cmd_load('AT+CGATT?','+CGATT: 1',1000,100)
-    at_cmd_load('','OK',1000)                                       
-    at_cmd_load('ATE0','OK',1000)                                  
-    at_cmd_load('AT+COPS?','OK',1000,0)
-    at_cmd_load('AT+SAPBR=3,1,\"CONTYPE\",\"GPRS\"','OK',1000)
+    at_cmd_load('ATE0','OK',3000,1000)
+    at_cmd_load('AT+ICCID', 'OK', 3000, 1000)
+--    at_cmd_load('AT','OK',500,1000)
+    at_cmd_load('AT+CGATT?','+CGATT: 1',3000,100)
+    at_cmd_load('','OK',3000)                                                
+    at_cmd_load('AT+COPS?','OK',3000,3,on_get_mccmnc_cb)
+    at_cmd_load('AT+SAPBR=3,1,\"CONTYPE\",\"GPRS\"','OK',3000,3)
 end
 
 --[[
@@ -218,14 +253,24 @@ end
 返回值：无
 --]]
 function air724ug_reset_init()
+    local function on_get_mccmnc_cb(send_cmd, recv_data)
+        if send_cmd == 'sim_oper' then
+            local regular_e = '+COPS: %d*,%d*,"(%d*)"'                                     -- 正则表达式
+            local my_mobile_mccmnc = string.match(recv_data, regular_e)                        -- 赋值给 my_mobile_mccmnc
+            local my_mobile_oper = setup_mobile_mccmnc[my_mobile_mccmnc]
+            at_cmd_load('AT+SAPBR=3,1,\"APN\",\"' .. my_mobile_oper .. '\"', 'OK', 3000, 3) -- 初始化设置
+            at_cmd_load('AT+SAPBR=1,1', 'OK', 3000, 3)                                      -- 初始化设置
+        end
+    end
 
-    at_cmd_load('AT','OK',500,100)
-    at_cmd_load('AT','OK',500,100)
-    at_cmd_load('AT+CGATT?','+CGATT: 1',1000,100)
-    at_cmd_load('','OK',1000)                                      
-    at_cmd_load('ATE0','OK',1000)                                  
-    at_cmd_load('AT+COPS?','OK',1000,0,on_get_mccmnc_cb)
-    at_cmd_load('AT+SAPBR=3,1,\"CONTYPE\",\"GPRS\"','OK',1000)
+    at_cmd_load('AT','OK',500,1000)
+    at_cmd_load('ATE0','OK',3000,1000)
+    at_cmd_load('AT+ICCID', 'OK', 3000, 1000)
+--    at_cmd_load('AT','OK',500,1000)
+    at_cmd_load('AT+CGATT?','+CGATT: 1',3000,100)
+    at_cmd_load('','OK',3000)                                                
+    at_cmd_load('AT+COPS?','OK',3000,3,on_get_mccmnc_cb)
+    at_cmd_load('AT+SAPBR=3,1,\"CONTYPE\",\"GPRS\"','OK',3000,3)
 end
 
 local string_val = ''

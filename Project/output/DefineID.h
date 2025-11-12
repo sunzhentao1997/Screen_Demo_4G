@@ -5,3 +5,5 @@
 
 #define  _TXT_DIS__MAIN_TEXT_DISPLAY2                                          2
 
+#define  _TXT_DIS__MAIN_TEXT_DISPLAY3                                          3
+

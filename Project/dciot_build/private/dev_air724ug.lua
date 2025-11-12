@@ -1,4 +1,18 @@
 -- This file is used to configure the air724ug module.
+local setup_mobile_mccmnc = 
+{
+    ['46000'] = 'CMIOT',
+    ['46001'] = 'uninet',
+    ['46002'] = 'CMIOT',
+    ['46003'] = 'ctnet',
+    ['46005'] = 'ctnet',
+    ['46006'] = 'uninet',
+    ['46007'] = 'CMIOT',
+    ['46009'] = 'uninet',
+    ['46011'] = 'ctnet',
+    ['46020'] = 'CMIOT'
+} -- ÒÆ¶¯½ÓÈëµã£¬ÓÃÓÚÉèÖÃÍøÂç½ÓÈëµã
+
 local at_cmd_timer = 20
 local air724ug_set_timer = 21
 local air724ug_set_timeout = 4000
@@ -12,19 +26,25 @@ local at_cmd_recv_callback = nil
 
 List = {}
 
+--[[
+º¯Êý¹¦ÄÜ£ºÉèÖÃ»Øµ÷º¯Êý
+²ÎÊý£ºsend_cb - ·¢ËÍÃüÁî»Øµ÷º¯Êý
+      recv_cb - ½ÓÊÕÊý¾Ý»Øµ÷º¯Êý
+--]]
 function air724ug_set_callback(send_cb,recv_cb)
     at_cmd_send_callback = send_cb
     at_cmd_recv_callback = recv_cb
 end
 
 --[[
-åˆ›å»ºå¹¶åˆå§‹åŒ–ä¸€ä¸?æ–°çš„åˆ—è¡¨ç»“æž„
-@è¿”å›ž table æ–°çš„åˆ—è¡¨ï¼ŒåŒ…å?åˆå?‹çš„é¦–å°¾ç´¢å¼•
+º¯Êý¹¦ÄÜ£º³õÊ¼»¯ÃüÁî¶ÓÁÐ
+²ÎÊý£ºÎÞ
+·µ»ØÖµ£ºÎÞ
 --]]
 function List.new()
     return {
-        first = 0,    -- åˆ—è¡¨é¦–å…ƒç´ ç´¢å¼?
-        last = -1     -- åˆ—è¡¨æœ?å…ƒç´ ç´¢å¼•
+        first = 0,    -- 
+        last = -1     -- 
     }
 end
 
@@ -32,27 +52,24 @@ local cmd_list = List.new()
 local cmd_current = nil
 
 --[[
-å‡½æ•°åŠŸèƒ½ï¼šå‘å‘½ä»¤é˜Ÿåˆ—ä¸?æ·»åŠ ATæŒ‡ä»¤
-å‚æ•°åˆ—è¡¨ï¼?
-    list - æŒ‡ä»¤é˜Ÿåˆ—å¯¹è±¡
-    cmd  - è¦æ·»åŠ çš„ATæŒ‡ä»¤å­—ç?¦ä¸²
+º¯Êý¹¦ÄÜ ½«ÃüÁîÌí¼Óµ½ÁÐ±íÖÐ
+²ÎÊý:   list - ÃüÁîÁÐ±í
+        cmd - ÒªÌí¼ÓµÄÃüÁî
+·µ»ØÖµ: ÎÞ
 --]]
 function List.pushcmd(list, cmd)
-    -- å¦‚æžœå‘½ä»¤ä¸ºç©ºï¼Œåˆ™ç›´æŽ¥è¿”å›ž
     if cmd == nil then
         return
     end
-
-    -- è®¡ç®—æ–°å‘½ä»¤çš„ç´¢å¼•ä½ç½®ï¼Œå¹¶å°†å…¶æ·»åŠ åˆ°åˆ—è¡¨ä¸­
     local last = cmd_list.last + 1
     cmd_list[last] = cmd
     cmd_list.last = last
 end
 
 --[[
-å‡½æ•°åŠŸèƒ½ï¼šä»Žå‘½ä»¤é˜Ÿåˆ—ä¸?å¼¹å‡ºç¬?ä¸€ä¸?å‘½ä»¤
-å‚æ•°ï¼šlist - å‘½ä»¤é˜Ÿåˆ—å¯¹è±¡
-è¿”å›žå€¼ï¼šæˆåŠŸè¿”å›žå‘½ä»¤å¯¹è±¡ï¼Œé˜Ÿåˆ—ä¸ºç©ºæ—¶è¿”å›žnil
+º¯Êý¹¦ÄÜ£º´ÓÁÐ±íÖÐÈ¡³öÃüÁî
+²ÎÊý£ºlist - ÃüÁîÁÐ±í
+·µ»ØÖµ£ºÃüÁî×Ö·û´®
 --]]
 function List.popcmd(list)
     local first = cmd_list.first
@@ -67,20 +84,21 @@ function List.popcmd(list)
 end
 
 --[[
-å‡½æ•°åŠŸèƒ½ï¼šatæŒ‡ä»¤è£…è½½å‡½æ•°
-å‚æ•°åˆ—è¡¨ï¼?
-    send_cmd  - è¦å‘é€çš„ATæŒ‡ä»¤å­—ç?¦ä¸²
-    recv_data - æŽ¥æ”¶åˆ°çš„æ•°æ®å­—ç?¦ä¸²
-    time_out  - è¶…æ—¶æ—¶é—´
-    retry     - é‡è¯•æ¬¡æ•°
+º¯Êý¹¦ÄÜ£º×°ÔØATÃüÁî
+²ÎÊý£ºsend_cmd - ·¢ËÍµÄATÃüÁî
+      recv_data - ½ÓÊÕµÄÊý¾Ý
+      time_out - ³¬Ê±Ê±¼ä
+      retry - ÖØÊÔ´ÎÊý
+·µ»ØÖµ£ºÎÞ
 --]]
-function at_cmd_load(send_cmd, recv_data, time_out, retry)
+function at_cmd_load(send_cmd, recv_data, time_out, retry, callback)
     local cmd = {}
 
     cmd.send_cmd = send_cmd
     cmd.recv_data = recv_data
     cmd.time_out = time_out
     cmd.retry = retry
+    cmd.callback = callback
 
     List.pushcmd(cmd_list, cmd)
 
@@ -90,8 +108,9 @@ function at_cmd_load(send_cmd, recv_data, time_out, retry)
 end
 
 --[[
-å‡½æ•°åŠŸèƒ½ï¼šAT æŒ‡ä»¤æ¸…é™¤
-å‚æ•°ï¼šæ— 
+º¯Êý¹¦ÄÜ£ºÇå¿ÕÃüÁî¶ÓÁÐ
+²ÎÊý£ºÎÞ
+·µ»ØÖµ£ºÎÞ
 --]]
 function at_cmd_clear()
     cmd_current = nil
@@ -101,8 +120,9 @@ function at_cmd_clear()
 end
 
 --[[
-å‡½æ•°åŠŸèƒ½ï¼šAT æŒ‡ä»¤å‘é€?
-å‚æ•°ï¼šæ— 
+º¯Êý¹¦ÄÜ£º·¢ËÍATÃüÁî
+²ÎÊý£ºÎÞ
+·µ»ØÖµ£ºÎÞ
 --]]
 function at_cmd_send()
     if cmd_current == nil then
@@ -119,8 +139,9 @@ function at_cmd_send()
 end
 
 --[[
-å‡½æ•°åŠŸèƒ½ï¼šAT æŒ‡ä»¤å‘é€ä¸‹ä¸€æ?
-å‚æ•°ï¼šæ— 
+º¯Êý¹¦ÄÜ£º·¢ËÍÏÂÒ»ÌõATÃüÁî
+²ÎÊý£ºÎÞ
+·µ»ØÖµ£ºÎÞ
 --]]
 function at_cmd_send_next()
     cmd_current = List.popcmd(cmd_list)
@@ -128,8 +149,9 @@ function at_cmd_send_next()
 end
 
 --[[
-å‡½æ•°åŠŸèƒ½ï¼šAT æŒ‡ä»¤å‘é€è¶…æ—¶å?„ç†
-å‚æ•°ï¼šæ— 
+º¯Êý¹¦ÄÜ£º·¢ËÍ³¬Ê±´¦Àí
+²ÎÊý£ºÎÞ
+·µ»ØÖµ£ºÎÞ
 --]]
 function at_cmd_send_timeout()
     if cmd_current == nil then
@@ -146,8 +168,9 @@ function at_cmd_send_timeout()
 end
 
 --[[
-å‡½æ•°åŠŸèƒ½ï¼šAT æŒ‡ä»¤æŽ¥æ”¶æ•°æ®å¤„ç†
-å‚æ•°ï¼šdata - æŽ¥æ”¶åˆ°çš„æ•°æ®å­—ç?¦ä¸²
+º¯Êý¹¦ÄÜ£ºÊý¾Ý½ÓÊÕ´¦Àí
+²ÎÊý£ºdata - ½ÓÊÕµÄÊý¾Ý
+·µ»ØÖµ£ºÎÞ
 --]]
 function at_cmd_recv_data(data)
 	if cmd_current == nil then
@@ -158,14 +181,22 @@ function at_cmd_recv_data(data)
         at_cmd_recv_callback(cmd_current.send_cmd, data)
 	end
 
+    if cmd_current.callback ~= nil then
+        cmd_current.callback(cmd_current.send_cmd, data)
+        if string.find(data, '+COPS') ~= nil then
+            cmd_current.callback('sim_oper', data)
+        end
+    end
+
 	if string.find(data, cmd_current.recv_data) ~= nil then
 		at_cmd_send_next()
 	end
 end
 
 --[[
-å‡½æ•°åŠŸèƒ½ï¼?4Gæ¨¡å—ä¸Šç”µ
-å‚æ•°ï¼šæ— 
+º¯Êý¹¦ÄÜ£º4gÄ£¿éÉÏµçÆô¶¯
+²ÎÊý£ºÎÞ
+·µ»ØÖµ£ºÎÞ
 --]]
 function air724ug_setup()
     gpio_set_value(air724ug_io_power, 1)
@@ -174,8 +205,9 @@ function air724ug_setup()
 end
 
 --[[
-å‡½æ•°åŠŸèƒ½ï¼?4Gæ¨¡å—å¤ä½
-å‚æ•°ï¼šæ— 
+º¯Êý¹¦ÄÜ£º4gÄ£¿é¸´Î»
+²ÎÊý£ºÎÞ
+·µ»ØÖµ£ºÎÞ
 --]]
 function air724ug_reset()
     gpio_set_value(air724ug_io_reset, 1)
@@ -184,44 +216,69 @@ function air724ug_reset()
 end
 
 --[[
-å‡½æ•°åŠŸèƒ½ï¼?4Gæ¨¡å—åˆå?‹åŒ–
-å‚æ•°ï¼šæ— 
+º¯Êý¹¦ÄÜ£º4gÄ£¿éÏµÍ³³õÊ¼»¯
+²ÎÊý£ºÎÞ
+·µ»ØÖµ£ºÎÞ
 --]]
 function air724ug_sys_init()
     gpio_set_out(air724ug_io_power)
     gpio_set_out(air724ug_io_reset)
     air724ug_setup()
 
-    --åˆå?‹åŒ–4Gæ¨¡å—
+    local function on_get_mccmnc_cb(send_cmd, recv_data)
+--        uart_send_string(send_cmd)
+        if send_cmd == 'sim_oper' then
+--            uart_send_string('init success')
+            local regular_e = '+COPS: %d*,%d*,"(%d*)"'                                     -- ÕýÔò±í´ïÊ½
+            local my_mobile_mccmnc = string.match(recv_data, regular_e)                        -- ¸³Öµ¸ø my_mobile_mccmnc
+            local my_mobile_oper = setup_mobile_mccmnc[my_mobile_mccmnc]
+            at_cmd_load('AT+SAPBR=3,1,\"APN\",\"' .. my_mobile_oper .. '\"', 'OK', 3000, 3) -- ³õÊ¼»¯ÉèÖÃ
+            at_cmd_load('AT+SAPBR=1,1', 'OK', 3000, 3)                                      -- ³õÊ¼»¯ÉèÖÃ
+        end
+    end
+
     at_cmd_load('AT','OK',500,1000)
-    at_cmd_load('AT','OK',500,1000)
-    at_cmd_load('AT+CGATT?','+CGATT: 1',1000,100)
-    at_cmd_load('','OK',1000)                                       --æ²¡æœ‰å‘½ä»¤ï¼Œåªæ˜?ç­‰å¾…OKè¿”å›ž
-    at_cmd_load('ATE0','OK',1000)                                   --å…³é—­å›žæ˜¾æ¨¡å¼
-    at_cmd_load('AT+COPS?','OK',1000,0)
-    at_cmd_load('AT+SAPBR=3,1,\"CONTYPE\",\"GPRS\"','OK',1000)
+    at_cmd_load('ATE0','OK',3000,1000)
+    at_cmd_load('AT+ICCID', 'OK', 3000, 1000)
+--    at_cmd_load('AT','OK',500,1000)
+    at_cmd_load('AT+CGATT?','+CGATT: 1',3000,100)
+    at_cmd_load('','OK',3000)                                                
+    at_cmd_load('AT+COPS?','OK',3000,3,on_get_mccmnc_cb)
+    at_cmd_load('AT+SAPBR=3,1,\"CONTYPE\",\"GPRS\"','OK',3000,3)
 end
 
 --[[
-å‡½æ•°åŠŸèƒ½ï¼?4Gæ¨¡å—é‡ç½®åˆå?‹åŒ–
-å‚æ•°ï¼šæ— 
+º¯Êý¹¦ÄÜ£º4gÄ£¿é¸´Î»³õÊ¼»¯
+²ÎÊý£ºÎÞ
+·µ»ØÖµ£ºÎÞ
 --]]
 function air724ug_reset_init()
-	--åˆå?‹åŒ–4Gæ¨¡å—
-    at_cmd_load('AT','OK',500,100)
-    at_cmd_load('AT','OK',500,100)
-    at_cmd_load('AT+CGATT?','+CGATT: 1',1000,100)
-    at_cmd_load('','OK',1000)                                       --æ²¡æœ‰å‘½ä»¤ï¼Œåªæ˜?ç­‰å¾…OKè¿”å›ž
-    at_cmd_load('ATE0','OK',1000)                                   --å…³é—­å›žæ˜¾æ¨¡å¼
-    at_cmd_load('AT+COPS?','OK',1000,0,on_get_mccmnc_cb)
-    at_cmd_load('AT+SAPBR=3,1,\"CONTYPE\",\"GPRS\"','OK',1000)
+    local function on_get_mccmnc_cb(send_cmd, recv_data)
+        if send_cmd == 'sim_oper' then
+            local regular_e = '+COPS: %d*,%d*,"(%d*)"'                                     -- ÕýÔò±í´ïÊ½
+            local my_mobile_mccmnc = string.match(recv_data, regular_e)                        -- ¸³Öµ¸ø my_mobile_mccmnc
+            local my_mobile_oper = setup_mobile_mccmnc[my_mobile_mccmnc]
+            at_cmd_load('AT+SAPBR=3,1,\"APN\",\"' .. my_mobile_oper .. '\"', 'OK', 3000, 3) -- ³õÊ¼»¯ÉèÖÃ
+            at_cmd_load('AT+SAPBR=1,1', 'OK', 3000, 3)                                      -- ³õÊ¼»¯ÉèÖÃ
+        end
+    end
+
+    at_cmd_load('AT','OK',500,1000)
+    at_cmd_load('ATE0','OK',3000,1000)
+    at_cmd_load('AT+ICCID', 'OK', 3000, 1000)
+--    at_cmd_load('AT','OK',500,1000)
+    at_cmd_load('AT+CGATT?','+CGATT: 1',3000,100)
+    at_cmd_load('','OK',3000)                                                
+    at_cmd_load('AT+COPS?','OK',3000,3,on_get_mccmnc_cb)
+    at_cmd_load('AT+SAPBR=3,1,\"CONTYPE\",\"GPRS\"','OK',3000,3)
 end
 
 local string_val = ''
 
 --[[
-å‡½æ•°åŠŸèƒ½ï¼?4Gæ¨¡å—æŽ¥æ”¶æ•°æ®å›žè°ƒå‡½æ•°
-å‚æ•°ï¼špacket - æŽ¥æ”¶åˆ°çš„æ•°æ®å­—ç?¦ä¸²
+º¯Êý¹¦ÄÜ£º´®¿Ú½ÓÊÕ»Øµ÷º¯Êý
+²ÎÊý£ºpacket - ´®¿Ú·µ»ØÊý¾Ý°ü
+·µ»ØÖµ£ºÎÞ
 --]]
 function on_air724ug_recv_data(packet)
     local len = #(packet)
@@ -242,8 +299,9 @@ function on_air724ug_recv_data(packet)
 end
 
 --[[
-å‡½æ•°åŠŸèƒ½ï¼?4Gæ¨¡å—æŽ¥æ”¶æ•°æ®å¤„ç†
-å‚æ•°ï¼šstr - æŽ¥æ”¶åˆ°çš„æ•°æ®å­—ç?¦ä¸²
+º¯Êý¹¦ÄÜ£º´®¿Ú½ÓÊÕÊý¾Ý´¦Àí
+²ÎÊý£ºstr - ½ÓÊÕµÄÊý¾Ý
+·µ»ØÖµ£ºÎÞ
 --]]
 function recv_data_handle(str)
 	if string.len(str) >= 0 then
@@ -253,8 +311,9 @@ function recv_data_handle(str)
 end
 
 --[[
-å‡½æ•°åŠŸèƒ½ï¼?4Gæ¨¡å—å®šæ—¶å™¨è¶…æ—¶å›žè°ƒå‡½æ•?
-å‚æ•°ï¼štimer_id - å®šæ—¶å™¨ID
+º¯Êý¹¦ÄÜ£º¶¨Ê±Æ÷³¬Ê±»Øµ÷º¯Êý
+²ÎÊý£ºtimer_id - ¶¨Ê±Æ÷ID
+·µ»ØÖµ£ºÎÞ
 --]]
 function on_air724ug_timer(timer_id)
     if timer_id == at_cmd_timer then
@@ -270,38 +329,39 @@ function on_air724ug_timer(timer_id)
 	end
 end
 
---[[***************************************************************************
-** Function name:  air_set_baudrate
-** Descriptions :  è®¾ç½®4Gæ¨¡å—æ³¢ç‰¹çŽ?
-** @baudrate    :  æ³¢ç‰¹çŽ?   
-***************************************************************************--]]
+--[[
+º¯Êý¹¦ÄÜ£ºÉèÖÃ4GÄ£¿éµÄ²¨ÌØÂÊ
+²ÎÊý£ºbaudrate - ²¨ÌØÂÊ
+·µ»ØÖµ£ºÎÞ
+--]]
 function at_set_baudrate(baudrate)
     at_cmd_load('AT+IPR=' .. baudrate, 'OK', 1000, 3)
 end
 
---[[***************************************************************************
-** Function name : at_cops_csq
-** Descriptions  : èŽ·å–è¿è¥å•†ä¿¡æ?ã€ä¿¡å·å¼ºåº?
-** @return       : nil,æ— è¿”å›žå€?
-***************************************************************************--]]
+--[[
+º¯Êý¹¦ÄÜ£ºÉèÖÃ4GÄ£¿éµÄÍøÂç×¢²áÐÅÏ¢ ÔËÓªÉÌºÍÐÅºÅÇ¿¶È
+²ÎÊý£ºÎÞ
+·µ»ØÖµ£ºÎÞ
+--]]
 function at_cops_csq()
     at_cmd_load('AT+COPS?','OK',1000)
     at_cmd_load('AT+CSQ','OK',1000)
 end
 
---[[***************************************************************************
-** Function name:  air_get_iccid
-** Descriptions :  èŽ·å–SIMå¡çš„ ICCID å·ç  
-***************************************************************************--]]
+--[[
+º¯Êý¹¦ÄÜ£º»ñÈ¡SIM¿¨µÄICCIDºÅÂë
+²ÎÊý£ºÎÞ
+·µ»ØÖµ£ºÎÞ
+--]]
 function at_get_iccid()
     at_cmd_load('AT+ICCID', 'OK', 1000, 3)
 end
 
---[[***************************************************************************
-** Function name:  air_get_base_station_time
-** Descriptions :  èŽ·å–åŸºç«™æ—¶é—´
--- è¿”å›žï¼?+CIPGSMLOC: 0,2022/07/12,09:35:21
-***************************************************************************--]]
+--[[
+º¯Êý¹¦ÄÜ£º»ñÈ¡»ùÕ¾Ê±¼ä
+²ÎÊý£ºÎÞ
+·µ»ØÖµ£ºÎÞ
+--]]
 function at_get_base_station_time()
     at_cmd_load('AT+CIPGSMLOC=2,1', 'OK', 9000, 3)
 end
